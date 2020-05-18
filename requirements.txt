@@ -1,3 +1,6 @@
 django
 gunicorn
 django-heroku
+pdfminer2
+pandas
+requests
