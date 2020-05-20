@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Upload The File</title>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
+    <script>
+
+        function analyzeText(){
+            var text = document.getElementById('text-to-analyze').value;
+
+            $.ajax({
+                type: "POST",
+                url: '{{ 'my-ajax-test/' }}',
+                data: { csrfmiddlewaretoken: '{{ csrf_token }}', text: text },
+                success: function callback(response){
+                           /* do whatever with the response */
+                           alert(response);
+                        }
+            });
+        }
+
+        function checkStatus() {
+          /* if '{{ statusInfo }}' == */
+          // var text = document.getElementById('text-to-analyze').value;
+          if('{{ statusFlag }}' == 'U') {
+              // start pdf conversion
+              var filepath = '{{ filepath }}'
+              $.ajax({
+                  type: "POST",
+                  url: '{{ 'convertFileToCsv/' }}',
+                  data: { csrfmiddlewaretoken: '{{ csrf_token }}', filepath: filepath },
+                  success: function callback(response){
+                             /* do whatever with the response */
+                             console.log('csv ready for download. downloading...');
+                          }
+              });
+
+          }
+        }
+    </script>
+</head>
+<body onload="checkStatus()">
+<form method="POST" class="post-form" enctype="multipart/form-data">
+        {% csrf_token %}
+        {{ form.as_p }}
+          <button type="submit" class="save btn btn-default">Convert</button>
+        <br/>
+        {% if statusInfo %}
+            {{statusInfo}}
+        {% endif %}
+</form>
+</body>
+</html>
