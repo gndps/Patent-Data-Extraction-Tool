@@ -52,7 +52,7 @@ def convert_pdf_to_txt_in_parts(path, start_page=0):
     page_increment = 2
     finish = False
     total_pages = get_total_pages(path)
-    # total_pages = 7
+    total_pages = 7
     start_page = int(start_page)
     end_page = min(start_page + page_increment, total_pages)
     if end_page == total_pages:
