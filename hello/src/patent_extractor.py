@@ -6,6 +6,7 @@ from .pdf_util import *
 
 import logging
 import pyexcel
+import csv
 
 logger = logging.getLogger(__name__)
 
@@ -26,6 +27,7 @@ def convert_patent_pdf(filename, parts=False, start_page=0):
         # pdf text cleaning
         pdf_text_processed = re.sub('\n', '', pdf_text)
         pdf_text_processed = re.sub('\s+', ' ', pdf_text_processed)
+        pdf_text_processed = re.sub(',', '‚', pdf_text_processed)
 
         # attriburte extraction regex
         app_no_regex = r'\(21\)\sApplication No\.\s*([\d]+)'
@@ -45,7 +47,7 @@ def convert_patent_pdf(filename, parts=False, start_page=0):
         # export file and make available for download
         datetime_timestamp = datetime.datetime.now(pytz.timezone("Asia/Kolkata")).strftime("%d-%m-%Y_%H%M%S")
         csv_filename = ('hello/static/uploads/patent_applications_data_' + datetime_timestamp + '.csv')
-        df.to_csv(csv_filename, index=False)
+        df.to_csv(csv_filename, index=False, quoting=csv.QUOTE_NONE)
         excel_filename = ('hello/static/uploads/patent_data_' + datetime_timestamp + '.xlsx')
         # sheet = pyexcel.get_sheet(file_name=csv_filename, delimiter=",")
         # sheet.save_as(excel_filename)
