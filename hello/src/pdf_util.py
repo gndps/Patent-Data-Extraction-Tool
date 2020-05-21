@@ -108,7 +108,7 @@ def convert_pdf_to_txt_in_parts(path, start_page=0):
     temp_file.close()
     logger.info(f'closing temp file.')
 
-    conversion_status = f'Conversion Status : {round(start_page/total_pages * 100, 2)}%'
+    conversion_status = f'Conversion : {round(start_page/total_pages * 100, 2)}%'
     logger.info(f'conversion_status : {conversion_status}')
     result = {}
 

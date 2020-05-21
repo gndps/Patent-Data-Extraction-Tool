@@ -46,7 +46,7 @@ def upload(request):
         patentInfo = PatentForm(request.POST, request.FILES)
         if patentInfo.is_valid():
             filepath = handle_uploaded_file(request.FILES['file'])
-            statusInfo = 'File Uploaded. Please Wait, conversion may take a few minutes..'
+            statusInfo = 'Conversion : 0.00%'
             statusFlag = 'U'
             uploadComplete = True
             conversionComplete = False
@@ -121,7 +121,7 @@ def convertFileToCsv(request):
 def loadFreshPage(request):
     logger.info('loading fresh upload page')
     patentInfo = PatentForm()
-    statusInfo = 'Please upload file or paste file url..'
+    statusInfo = ''
     uploadComplete = False
     conversionComplete = False
     statusFlag = 'S'

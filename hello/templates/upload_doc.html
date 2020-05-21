@@ -15,9 +15,40 @@
       background-color: #654ea3; /* For browsers that do not support gradients */
       background-image: linear-gradient(to right, #6190E8, #A7BFE8); /* Standard syntax (must be last) */
     }
+    #patent_tool {
+      text-align: center;
+      margin: auto;
+      width: 60%;
+      padding: 10px;
+    }
     html, body, #mydiv {
       height: 100%;
       min-height: 100vh;
+      padding-top: 32px;
+    }
+    label {
+      display: none;
+    }
+    .title {
+      font-size: xx-large;
+      margin-top: 20px;
+      padding: 20px;
+      color: white;
+      font-family: sans-serif;
+      font-style: normal;
+      letter-spacing: 1px;
+    }
+    .subtitle {
+      display: inline-block;
+      margin-top: 20px;
+    }
+    .statusInfo {
+      margin-top: 20px;
+      padding: 20px;
+      color: white;
+      font-family: sans-serif;
+      font-style: normal;
+      letter-spacing: 1px;
     }
     .center {
       text-align: center;
@@ -165,18 +196,21 @@
     </script>
 </head>
 <body id="grad1" class="center" onload="checkStatus('', '', '{{statusFlag}}')">
-<span class="title"> Patent Applications & Applicants Tool </Span>
-<span class="subtitle"> Please upload file and click on convert. </Span>
-<form method="POST" class="post-form" enctype="multipart/form-data">
-        {% csrf_token %}
-        {{ form.as_p }}
-          <button type="submit" class="save btn btn-default btn-three">Convert</button>
-        <br/>
-        <span id='statusInfo'>
-        {% if statusInfo %}
-            {{statusInfo}}
-        {% endif %}
-        </span>
-</form>
+  <div id="patent_tool">
+    <span class="title"> Patent Data Extraction Tool </span>
+    <br/>
+    <!-- <span class="subtitle"> Please upload file and click on convert. </span> -->
+    <form method="POST" class="post-form" enctype="multipart/form-data">
+            {% csrf_token %}
+            {{ form.as_p }}
+              <button type="submit" class="save btn btn-default btn-three">Convert</button>
+            <br/>
+            <span id='statusInfo' class='statusInfo'>
+            {% if statusInfo %}
+                {{statusInfo}}
+            {% endif %}
+            </span>
+    </form>
+  </div>
 </body>
 </html>

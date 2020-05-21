@@ -40,7 +40,7 @@ def convert_patent_pdf(filename, parts=False, start_page=0):
 
         logger.info('exporting csv file')
 
-        df = pd.DataFrame({'Application No.' : application_nos, 'Name of Applicants' : applicants}).drop_duplicates(subset='application no', keep="first")
+        df = pd.DataFrame({'Application No.' : application_nos, 'Name of Applicants' : applicants}).drop_duplicates(subset='Application No.', keep="first")
 
         # export file and make available for download
         datetime_timestamp = datetime.datetime.now(pytz.timezone("Asia/Kolkata")).strftime("%d-%m-%Y_%H%M%S")
