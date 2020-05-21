@@ -15,7 +15,7 @@ import hello.views
 # Learn more here: https://docs.djangoproject.com/en/2.1/topics/http/urls/
 
 urlpatterns = [
-    path("", hello.views.index, name="index"),
+    path("", hello.views.index, name="upload"),
     path("teapot", hello.views.teapot, name="teapot"),
     path("upload", hello.views.upload, name="upload"),
     path('convertFileToCsv/', hello.views.convertFileToCsv),
