@@ -5,3 +5,6 @@ pdfminer2
 pandas
 requests
 django-background-tasks
+PyPDF2
+pyexcel
+pyexcel-xlsx

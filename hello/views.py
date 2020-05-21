@@ -1,14 +1,19 @@
 from django.shortcuts import render,redirect
 from django.http import HttpResponse
+from django.http import Http404
 from django.conf import settings
 from django.core.files.storage import FileSystemStorage
 
 from .models import Greeting
 from .forms import PatentForm
 from .src.patent_extractor import convert_patent_pdf
+from .src.pdf_util import get_filename_without_extension
 
 import logging
 import os
+import datetime
+import pytz
+import json
 
 import requests
 from background_task import background
@@ -55,20 +60,63 @@ def upload(request):
     else:
         return loadFreshPage(request)
 
+
 def convertFileToCsv(request):
     logger.info('converting pdf to csv...')
     filepath = request.POST['filepath']
-    csv_filepath = convert_patent_pdf(filepath)
-    if os.path.exists(csv_filepath):
-        logger.info('csv file path exists')
-        with open(csv_filepath, 'rb') as fh:
-            response = HttpResponse(fh.read(), content_type='text/csv')
-            response['Content-Disposition'] = 'inline; filename=' + os.path.basename(csv_filepath)
-            logger.info('returning csv response')
-            return response
+    start_page = request.POST['start_page']
+    logger.info('======================')
+    logger.info('======================')
+    logger.info(f'filepath = {filepath}')
+    logger.info(f'start_page = {start_page}')
+    logger.info('======================')
+    logger.info('======================')
+    result = convert_patent_pdf(filepath, parts=True, start_page=start_page)
+    if result['conversion_status'] == 'Conversion Complete':
+        csv_filepath = result['csv_filepath']
+        # excel_filepath = result['excel_filepath']
+        # if os.path.exists(csv_filepath) and os.path.exists(excel_filepath):
+        if os.path.exists(csv_filepath):
+            logger.info('csv file path exists')
+            with open(csv_filepath, 'r') as fh:
+                data = fh.read()
+                filename = os.path.basename(csv_filepath)
+                # response = HttpResponse(fh.read(), content_type='text/csv')
+                # response['Content-Disposition'] = 'inline; filename=' + os.path.basename(csv_filepath)
+                logger.info('returning excel response')
+                renderDict = {
+                    'data' : data,
+                    'statusFlag' : 'D',
+                    'filename' : filename
+                }
+                json_data = json.dumps(renderDict)
+                return HttpResponse(json_data, content_type="application/json")
+        else:
+            logger.info('csv file doesnt path exists')
+            renderDict = {
+                'statusInfo' : 'Some problem occured in downloading file',
+                'statusFlag' : 'E',
+            }
+            json_data = json.dumps(renderDict)
+            return HttpResponse(json_data, content_type="application/json")
     else:
-        logger.info('csv file doesnt path exists')
-        return loadFreshPage(request)
+        logger.info('loading intermediate page for file conversion..')
+        patentInfo = PatentForm()
+        statusInfo = result['conversion_status']
+        path = result['path']
+        start_page = result['start_page']
+        uploadComplete = True
+        conversionComplete = False
+        statusFlag = 'C'
+        renderDict = {
+            'statusInfo' : statusInfo,
+            'statusFlag' : statusFlag,
+            'start_page' : start_page,
+            'filepath' : path
+        }
+        json_data = json.dumps(renderDict)
+        return HttpResponse(json_data, content_type="application/json")
+        # return render(request, "upload_doc.html", renderDict)
 
 def loadFreshPage(request):
     logger.info('loading fresh upload page')
@@ -85,11 +133,13 @@ def loadFreshPage(request):
     return render(request,"upload_doc.html", renderDict)
 
 def handle_uploaded_file(f):
-    with open('hello/static/uploads/'+f.name, 'wb+') as destination:
+    datetime_timestamp = datetime.datetime.now(pytz.timezone("Asia/Kolkata")).strftime("%d-%m-%Y_%H%M%S")
+    filepath = 'hello/static/uploads/'+ get_filename_without_extension(f.name) + datetime_timestamp + '.pdf'
+    with open(filepath, 'wb+') as destination:
         for chunk in f.chunks():
             destination.write(chunk)
     logger.info('File upload complete')
-    return ('hello/static/uploads/' + f.name)
+    return (filepath)
 
 
 def db(request):

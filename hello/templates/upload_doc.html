@@ -20,19 +20,66 @@
             });
         }
 
-        function checkStatus() {
+        function saveData(data, fileName) {
+            const blob = new Blob([data], {type: "octet/stream"}),
+                url = window.URL.createObjectURL(blob);
+            a = document.getElementsByTagName("a")[0]
+            a.href = url;
+            a.download = fileName;
+            a.click();
+            window.URL.revokeObjectURL(url);
+        }
+
+        function checkStatus(fp, sp = 0, sf='S') {
           /* if '{{ statusInfo }}' == */
           // var text = document.getElementById('text-to-analyze').value;
-          if('{{ statusFlag }}' == 'U') {
+          if(sf == 'S') {
+            console.log('loaded check status  : S')
+            // add dummy element for download
+            const a = document.createElement("a");
+            document.body.appendChild(a);
+            a.style = "display: none";
+          }
+          else if (sf == 'C') {
+              console.log('loaded check status  : C')
+              var filepath = '{{ filepath }}'
+              var start_page = sp
+              $.ajax({
+                  type: "POST",
+                  url: '{{ 'convertFileToCsv/' }}',
+                  data: { csrfmiddlewaretoken: '{{ csrf_token }}', filepath: filepath, start_page: start_page },
+                  success: function callback(response){
+                            console.log(response)
+                             /* do whatever with the response */
+                             if(response['statusFlag'] == 'C') {
+                               document.getElementById('statusInfo').textContent = response['statusInfo'];
+                               checkStatus(fp=response['filepath'], sp=response['start_page'], sf=response['statusFlag'])
+                             } else if (response['statusFlag'] == 'D') {
+                               const data = response['data'],
+                               fileName = response['filename'];
+                               document.getElementById('statusInfo').textContent = 'Conversion Complete';
+                               saveData(data, fileName);
+                             }
+                          }
+              });
+          } else if(sf == 'U' || '{{ statusFlag }}' == 'U') {
+              console.log('loaded check status  : U')
+              const a = document.createElement("a");
+              document.body.appendChild(a);
+              a.style = "display: none";
               // start pdf conversion
               var filepath = '{{ filepath }}'
               $.ajax({
                   type: "POST",
                   url: '{{ 'convertFileToCsv/' }}',
-                  data: { csrfmiddlewaretoken: '{{ csrf_token }}', filepath: filepath },
+                  data: { csrfmiddlewaretoken: '{{ csrf_token }}', filepath: filepath, start_page : 0},
                   success: function callback(response){
                              /* do whatever with the response */
-                             console.log('csv ready for download. downloading...');
+                             console.log(response)
+                             if(response['statusFlag'] == 'C') {
+                               document.getElementById('statusInfo').textContent = response['statusInfo'];
+                               checkStatus(fp=response['filepath'], sp=response['start_page'], sf=response['statusFlag'])
+                             }
                           }
               });
 
@@ -40,15 +87,17 @@
         }
     </script>
 </head>
-<body onload="checkStatus()">
+<body onload="checkStatus('', '', '{{statusFlag}}')">
 <form method="POST" class="post-form" enctype="multipart/form-data">
         {% csrf_token %}
         {{ form.as_p }}
           <button type="submit" class="save btn btn-default">Convert</button>
         <br/>
+        <span id='statusInfo'>
         {% if statusInfo %}
             {{statusInfo}}
         {% endif %}
+        </span>
 </form>
 </body>
 </html>
