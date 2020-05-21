@@ -134,7 +134,7 @@ def loadFreshPage(request):
 
 def handle_uploaded_file(f):
     datetime_timestamp = datetime.datetime.now(pytz.timezone("Asia/Kolkata")).strftime("%d-%m-%Y_%H%M%S")
-    filepath = 'hello/static/uploads/'+ get_filename_without_extension(f.name) + datetime_timestamp + '.pdf'
+    filepath = 'hello/static/uploads/'+ get_filename_without_extension(f.name) + '_' + datetime_timestamp + '.pdf'
     with open(filepath, 'wb+') as destination:
         for chunk in f.chunks():
             destination.write(chunk)
