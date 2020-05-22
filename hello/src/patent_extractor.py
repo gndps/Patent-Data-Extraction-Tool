@@ -30,15 +30,18 @@ def convert_patent_pdf(filename, parts=False, start_page=0):
         pdf_text_processed = re.sub(',', '‚', pdf_text_processed)
 
         # attriburte extraction regex
-        app_no_regex = r'\(21\)\sApplication No\.\s*([\d]+)'
-        applicant_regex_old = r'\(71\)\s*Name of Applicant\s*\:\s*([\d]+(.(?!72\)))*)'
-        applicant_regex = r'\(71\)\s*Name of Applicant\s*\:\s*[\d]+\)((.(?!2\))(?!72\)))*)'
+        # app_no_regex = r'\(21\)\sApplication No\.\s*([\d]+)'
+        # applicant_regex = r'\(71\)\s*Name of Applicant\s*\:\s*[\d]+\)((.(?!2\))(?!72\)))*)'
+        combined_regex = r'\(21\)\sApplication No\.\s*([\d]+)(?:.(?!Address\sof\sApplicant))*\(71\)\s*Name[\s]*of[\s]*Applicant\s*\:\s*[A-Za-z0-9\s\:\/]*[\d]+\)((?:.(?!2\))(?!Address\sof\sApplicant))*)'
 
         # extract attributes
         logger.info('extracting attributes..')
-        application_nos = re.findall(app_no_regex, pdf_text_processed)
-        applicants = re.findall(applicant_regex, pdf_text_processed)
-        applicants = [appl[0] for appl in applicants]
+        regex_results = re.findall(combined_regex, pdf_text_processed)
+        # application_nos = re.findall(app_no_regex, pdf_text_processed)
+        # applicants = re.findall(applicant_regex, pdf_text_processed)
+        application_nos = [appl[0] for appl in regex_results]
+        applicants = [appl[1] for appl in regex_results]
+
 
         logger.info('exporting csv file')
 
